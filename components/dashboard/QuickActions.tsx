@@ -3,11 +3,14 @@
 import Link from "next/link";
 
 const QUICK_ACTIONS = [
+   { icon: "✂️", label: "Book Barbing", href: "/dashboard/book?category=barbing" },
   { icon: "💅", label: "Book Nails", href: "/dashboard/book?category=nails" },
   { icon: "💇", label: "Book Hair", href: "/dashboard/book?category=hair" },
   { icon: "✨", label: "Book Lashes", href: "/dashboard/book?category=lashes" },
   { icon: "🌿", label: "Book Skincare", href: "/dashboard/book?category=skincare" },
+  { icon: "🧖", label: "Book Spa", href: "/dashboard/book?category=spa" },
 ];
+
 
 export default function QuickActions() {
   return (
