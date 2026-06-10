@@ -1,36 +1,20 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import AdminSidebar from "@/components/admin/AdminSidebar";
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
-
   if (!user) redirect("/auth/login");
 
   const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+    .from("profiles").select("role").eq("id", user.id).single();
 
-  // Redirect business owners to their dashboard
-  if (profile?.role === "business_owner") {
-    redirect("/business/dashboard");
-  }
-
-  // Redirect admins to admin panel
-  if (profile?.role === "admin") {
-    redirect("/admin");
-  }
+  if (profile?.role !== "admin") redirect("/dashboard");
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--cream)" }}>
-      <DashboardSidebar profile={profile} />
+      <AdminSidebar />
       <main style={{ flex: 1, overflow: "auto" }}>
         <div className="md:hidden" style={{ height: "60px" }} />
         {children}

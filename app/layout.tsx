@@ -5,16 +5,30 @@ import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "GlowReserve — Premium Beauty & Wellness Marketplace",
-  description: "Discover and book top-rated beauty salons, spas, and wellness providers near you.",
+  description:
+    "Discover and book top-rated beauty salons, spas, and wellness providers near you.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#D4AF37" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="GlowReserve" />
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body>
         <Providers>

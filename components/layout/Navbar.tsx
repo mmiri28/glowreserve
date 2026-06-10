@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu, X, Sparkles, Bell, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import ThemeToggle from "@/components/shared/ThemeToggle";
+import type { Session} from "@supabase/supabase-js";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,9 +18,28 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+ useEffect(() => {
+  const supabase = createClient();
+
+  // Get current user
+  supabase.auth.getUser().then(({ data }: any) => setUser(data.user));
+
+  // Listen for auth changes (login/logout)
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    (_event: any, session: Session | null) => {
+      setUser(session?.user ?? null);
+    }
+  );
+
+  return () => subscription.unsubscribe();
+}, []);
+  // Close menu on resize to desktop
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }: any) => setUser(data.user));
+    const handleResize = () => {
+      if (window.innerWidth >= 768) setIsOpen(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
@@ -31,34 +51,50 @@ export default function Navbar() {
       boxShadow: scrolled ? "0 2px 12px rgba(26,26,26,0.06)" : "none",
       backgroundColor: scrolled ? "var(--surface)" : "transparent",
     }}>
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1.5rem" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "72px" }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}>
-            <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: "linear-gradient(135deg, #D4AF37, #B8941F)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Sparkles size={18} color="white" />
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 1.25rem" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "68px" }}>
+
+          {/* Logo */}
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none", flexShrink: 0 }}>
+            <div style={{ width: "34px", height: "34px", borderRadius: "9px", background: "linear-gradient(135deg, #D4AF37, #B8941F)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Sparkles size={17} color="white" />
             </div>
-            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.375rem", fontWeight: "700", color: "var(--charcoal)", letterSpacing: "-0.01em" }}>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.25rem", fontWeight: "700", color: "var(--charcoal)" }}>
               Glow<span style={{ color: "#D4AF37" }}>Reserve</span>
             </span>
           </Link>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }} className="hidden md:flex">
+          {/* Desktop nav links — hidden on mobile */}
+          <div className="desktop-only" style={{ alignItems: "center", gap: "0.25rem" }}>
             {[{ label: "Explore", href: "/explore" }, { label: "For Business", href: "/business/register" }].map((item) => (
-              <Link key={item.label} href={item.href} style={{ padding: "0.5rem 1rem", borderRadius: "0.625rem", fontSize: "0.875rem", fontWeight: "500", color: "var(--muted)", textDecoration: "none", transition: "all 0.2s" }}
-                onMouseEnter={(e) => { (e.target as HTMLElement).style.color = "var(--charcoal)"; (e.target as HTMLElement).style.background = "rgba(212,175,55,0.06)"; }}
-                onMouseLeave={(e) => { (e.target as HTMLElement).style.color = "var(--muted)"; (e.target as HTMLElement).style.background = "transparent"; }}>
+              <Link key={item.label} href={item.href} style={{
+                padding: "0.5rem 1rem", borderRadius: "0.625rem",
+                fontSize: "0.875rem", fontWeight: "500",
+                color: "var(--muted)", textDecoration: "none", transition: "all 0.2s",
+              }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.color = "var(--charcoal)";
+                  (e.target as HTMLElement).style.background = "rgba(212,175,55,0.06)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.color = "var(--muted)";
+                  (e.target as HTMLElement).style.background = "transparent";
+                }}>
                 {item.label}
               </Link>
             ))}
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }} className="hidden md:flex">
+          {/* Desktop right actions — hidden on mobile */}
+          <div className="desktop-only" style={{ alignItems: "center", gap: "0.75rem" }}>
             <ThemeToggle minimal />
             {user ? (
               <>
-                <Link href="/dashboard/notifications" style={{ color: "var(--muted)", padding: "0.5rem" }}><Bell size={20} /></Link>
+                <Link href="/dashboard/notifications" style={{ color: "var(--muted)", padding: "0.5rem", display: "flex" }}>
+                  <Bell size={20} />
+                </Link>
                 <Link href="/dashboard" className="btn-gold" style={{ fontSize: "0.8125rem", padding: "0.5rem 1.25rem" }}>
-                  <User size={16} style={{ marginRight: "0.375rem" }} />Dashboard
+                  <User size={15} style={{ marginRight: "0.375rem" }} />Dashboard
                 </Link>
               </>
             ) : (
@@ -69,24 +105,59 @@ export default function Navbar() {
             )}
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }} className="md:hidden">
+          {/* Mobile right side — hamburger only, hidden on desktop */}
+          <div className="mobile-only" style={{ alignItems: "center", gap: "0.5rem" }}>
             <ThemeToggle minimal />
-            <button onClick={() => setIsOpen(!isOpen)} style={{ color: "var(--charcoal)", padding: "0.5rem", background: "none", border: "none", cursor: "pointer" }}>
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              style={{ color: "var(--charcoal)", padding: "0.5rem", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+              aria-label="Toggle menu"
+            >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
 
+        {/* Mobile dropdown menu */}
         {isOpen && (
-          <div style={{ background: "var(--surface)", borderRadius: "0 0 1rem 1rem", padding: "1rem", borderTop: "1px solid var(--border)" }} className="md:hidden animate-slide-up">
+          <div style={{
+            background: "var(--surface)",
+            borderRadius: "0 0 1rem 1rem",
+            padding: "0.75rem",
+            borderTop: "1px solid var(--border)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+          }}>
+            {/* Nav links */}
             {[{ label: "Explore", href: "/explore" }, { label: "For Business", href: "/business/register" }].map((item) => (
-              <Link key={item.label} href={item.href} style={{ display: "block", padding: "0.75rem 1rem", borderRadius: "0.625rem", fontSize: "0.9375rem", fontWeight: "500", color: "var(--charcoal)", textDecoration: "none", marginBottom: "0.25rem" }}
-                onClick={() => setIsOpen(false)}>{item.label}</Link>
+              <Link key={item.label} href={item.href}
+                style={{ display: "block", padding: "0.75rem 1rem", borderRadius: "0.625rem", fontSize: "0.9375rem", fontWeight: "500", color: "var(--charcoal)", textDecoration: "none", marginBottom: "0.25rem" }}
+                onClick={() => setIsOpen(false)}>
+                {item.label}
+              </Link>
             ))}
-            <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid var(--border)" }}>
-              <Link href="/auth/login" className="btn-ghost" style={{ flex: 1, justifyContent: "center", fontSize: "0.875rem" }}>Sign In</Link>
-              <Link href="/auth/register" className="btn-gold" style={{ flex: 1, justifyContent: "center", fontSize: "0.875rem" }}>Get Started</Link>
-            </div>
+
+            <div style={{ height: "1px", background: "var(--border)", margin: "0.5rem 0" }} />
+
+            {/* Auth buttons */}
+            {user ? (
+              <div style={{ display: "flex", gap: "0.625rem", padding: "0.25rem 0" }}>
+                <Link href="/dashboard/notifications" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.375rem", padding: "0.75rem", borderRadius: "0.75rem", border: "1px solid var(--border)", color: "var(--charcoal)", textDecoration: "none", fontSize: "0.875rem", fontWeight: "600" }}
+                  onClick={() => setIsOpen(false)}>
+                  <Bell size={16} /> Notifications
+                </Link>
+                <Link href="/dashboard" className="btn-gold" style={{ flex: 1, justifyContent: "center", fontSize: "0.875rem" }}
+                  onClick={() => setIsOpen(false)}>
+                  Dashboard
+                </Link>
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: "0.625rem", padding: "0.25rem 0" }}>
+                <Link href="/auth/login" className="btn-ghost" style={{ flex: 1, justifyContent: "center", fontSize: "0.875rem" }}
+                  onClick={() => setIsOpen(false)}>Sign In</Link>
+                <Link href="/auth/register" className="btn-gold" style={{ flex: 1, justifyContent: "center", fontSize: "0.875rem" }}
+                  onClick={() => setIsOpen(false)}>Get Started</Link>
+              </div>
+            )}
           </div>
         )}
       </div>

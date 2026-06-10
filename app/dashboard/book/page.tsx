@@ -108,61 +108,88 @@ export default function BookPage() {
     return !error;
   };
 
-  const confirmBooking = async () => {
-    setConfirming(true);
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push("/auth/login"); return; }
+ const confirmBooking = async () => {
+  setConfirming(true);
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) { router.push("/auth/login"); return; }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name, phone")
-      .eq("id", user.id)
-      .single();
+  // Use maybeSingle() — never crashes if profile missing
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, phone")
+    .eq("id", user.id)
+    .maybeSingle();
 
-    // Reserve the slot
-    const { error: slotError } = await supabase
-      .from("slots")
-      .update({ status: "reserved" })
-      .eq("id", booking.slotId)
-      .in("status", ["free", "hold"]);
+  // Reserve the slot
+  const { error: slotError } = await supabase
+    .from("slots")
+    .update({ status: "reserved", hold_expires_at: null })
+    .eq("id", booking.slotId)
+    .in("status", ["free", "hold"]);
 
-    if (slotError) {
-      toast.error("This slot was just taken. Please select another time.");
-      setStep(3);
-      setConfirming(false);
-      return;
-    }
-
-    // Create booking
-    const { error: bookingError } = await supabase
-      .from("bookings")
-      .insert({
-        customer_id: user.id,
-        business_id: booking.businessId!,
-        service_id: booking.serviceId!,
-        staff_id: booking.staffId || null,
-        slot_id: booking.slotId!,
-        slot_datetime: booking.slotDatetime!,
-        status: "pending",
-        customer_name: profile?.full_name || "",
-        customer_phone: profile?.phone || "",
-        customer_email: user.email || "",
-      });
-
-    if (bookingError) {
-      toast.error("Booking failed. Please try again.");
-    } else {
-      // Trigger notification via API
-      await fetch("/api/notifications/booking-created", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingData: booking, userId: user.id }),
-      });
-      setSuccess(true);
-    }
+  if (slotError) {
+    toast.error("This slot was just taken. Please select another time.");
+    setStep(3);
     setConfirming(false);
-  };
+    return;
+  }
+
+  // Create booking
+  const { error: bookingError } = await supabase
+    .from("bookings")
+    .insert({
+      customer_id: user.id,
+      business_id: booking.businessId!,
+      service_id: booking.serviceId!,
+      staff_id: booking.staffId || null,
+      slot_id: booking.slotId!,
+      slot_datetime: booking.slotDatetime!,
+      status: "pending",
+      customer_name: profile?.full_name || user.email?.split("@")[0] || "Customer",
+      customer_phone: profile?.phone || null,
+      customer_email: user.email || "",
+    });
+
+  if (bookingError) {
+    console.error("Booking error:", bookingError);
+    if (bookingError.code === "23505") {
+      toast.error("This slot was just booked. Please choose another time.");
+      setStep(3);
+    } else {
+      toast.error("Booking failed. Please try again.");
+    }
+  } else {
+    // Notify business owner
+    const { data: biz } = await supabase
+      .from("businesses")
+      .select("owner_id")
+      .eq("id", booking.businessId!)
+      .maybeSingle();
+
+    if (biz) {
+      await supabase.from("notifications").insert({
+        user_id: (biz as any).owner_id,
+        type: "booking_created",
+        title: "New Booking Request! 📅",
+        message: `${profile?.full_name || "A customer"} booked ${booking.serviceName} for ${format(new Date(booking.slotDatetime!), "MMM d 'at' h:mm a")}.`,
+        metadata: { booking_id: booking.slotId },
+      });
+    }
+
+    // Notify customer
+    await supabase.from("notifications").insert({
+      user_id: user.id,
+      type: "booking_pending",
+      title: "Booking Request Sent ✅",
+      message: `Your request for ${booking.serviceName} at ${booking.businessName} is pending approval.`,
+      metadata: {},
+    });
+
+    setSuccess(true);
+  }
+  setConfirming(false);
+};
 
   // ── SUCCESS SCREEN ──
   if (success) {

@@ -1,257 +1,136 @@
-"use client"
-import Link from "next/link";
-import { Star, MapPin, Clock, ArrowRight } from "lucide-react";
+"use client";
 
-// Mock data for demo — real data comes from Supabase
-const TOP_SALONS = [
-  {
-    id: "1",
-    slug: "luxe-lash-lounge",
-    name: "Luxe Lash Lounge",
-    category: "Lashes & Brows",
-    rating: 4.9,
-    reviews: 342,
-    city: "New York, NY",
-    startingFrom: 85,
-    turnaround: "45 min",
-    image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&q=80",
-    verified: true,
-    tags: ["Classic Lashes", "Volume", "Brow Lamination"],
-  },
-  {
-    id: "2",
-    slug: "glow-nail-studio",
-    name: "Glow Nail Studio",
-    category: "Nails",
-    rating: 4.8,
-    reviews: 218,
-    city: "Los Angeles, CA",
-    startingFrom: 45,
-    turnaround: "60 min",
-    image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&q=80",
-    verified: true,
-    tags: ["Gel", "Acrylic", "Nail Art"],
-  },
-  {
-    id: "3",
-    slug: "velvet-hair-salon",
-    name: "Velvet Hair Salon",
-    category: "Hair",
-    rating: 4.7,
-    reviews: 481,
-    city: "Miami, FL",
-    startingFrom: 65,
-    turnaround: "90 min",
-    image: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=400&q=80",
-    verified: true,
-    tags: ["Balayage", "Cuts", "Treatment"],
-  },
-  {
-    id: "4",
-    slug: "serenity-spa",
-    name: "Serenity Spa & Wellness",
-    category: "Spa & Massage",
-    rating: 5.0,
-    reviews: 156,
-    city: "Chicago, IL",
-    startingFrom: 110,
-    turnaround: "75 min",
-    image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&q=80",
-    verified: true,
-    tags: ["Deep Tissue", "Facial", "Hot Stone"],
-  },
-];
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Star, MapPin, ArrowRight, CheckCircle } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function TopSalons() {
+  const [businesses, setBusinesses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+  const fetchBusinesses = async () => {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from("businesses")
+      .select(
+        "id, name, slug, category, city, rating, total_reviews, cover_image_url, logo_url, is_verified, description"
+      )
+      .order("rating", { ascending: false })
+      .limit(6);
+
+    if (error) {
+      console.error(error);
+    }
+
+    setBusinesses(data || []);
+    setLoading(false);
+  };
+
+  fetchBusinesses();
+}, []);
   return (
-    <section style={{ padding: "5rem 1.5rem", background: "white" }}>
+    <section style={{ padding: "5rem 1.5rem", background: "var(--cream)" }}>
       <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
-        <div style={{
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          marginBottom: "2.5rem",
-          flexWrap: "wrap",
-          gap: "1rem",
-        }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "3rem", flexWrap: "wrap", gap: "1rem" }}>
           <div>
-            <span style={{
-              fontSize: "0.8125rem",
-              fontWeight: "600",
-              color: "#D4AF37",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-            }}>
-              Editor&apos;s Pick
+            <span style={{ fontSize: "0.8125rem", fontWeight: "600", color: "#D4AF37", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+              Featured
             </span>
-            <h2 style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-              fontWeight: "700",
-              color: "#1A1A1A",
-              marginTop: "0.5rem",
-            }}>
-              Top-Rated Providers
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: "700", color: "var(--charcoal)", marginTop: "0.5rem" }}>
+              Top Rated Businesses
             </h2>
           </div>
-          <Link href="/explore" style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.375rem",
-            color: "#D4AF37",
-            fontWeight: "600",
-            fontSize: "0.9375rem",
-            textDecoration: "none",
-          }}>
+          <Link href="/explore" style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#D4AF37", fontWeight: "600", textDecoration: "none", fontSize: "0.9375rem" }}>
             View all <ArrowRight size={16} />
           </Link>
         </div>
 
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-          gap: "1.5rem",
-        }}>
-          {TOP_SALONS.map((salon) => (
-            <Link
-              key={salon.id}
-              href={`/business/${salon.slug}`}
-              style={{ textDecoration: "none" }}
-            >
-              <div style={{
-                background: "white",
-                borderRadius: "1.25rem",
-                overflow: "hidden",
-                border: "1px solid rgba(232,226,217,0.8)",
-                transition: "all 0.25s",
-                cursor: "pointer",
-              }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.transform = "translateY(-6px)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 48px rgba(26,26,26,0.12)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
-                }}>
-                {/* Image */}
-                <div style={{ position: "relative", height: "200px", overflow: "hidden" }}>
-                  <img
-                    src={salon.image}
-                    alt={salon.name}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                  {salon.verified && (
-                    <div style={{
-                      position: "absolute",
-                      top: "0.75rem",
-                      left: "0.75rem",
-                      background: "rgba(212,175,55,0.95)",
-                      color: "white",
-                      fontSize: "0.6875rem",
-                      fontWeight: "600",
-                      padding: "0.25rem 0.625rem",
-                      borderRadius: "9999px",
-                      letterSpacing: "0.04em",
-                    }}>
-                      ✓ VERIFIED
-                    </div>
-                  )}
-                  <div style={{
-                    position: "absolute",
-                    bottom: "0.75rem",
-                    right: "0.75rem",
-                    background: "rgba(255,255,255,0.95)",
-                    borderRadius: "0.625rem",
-                    padding: "0.375rem 0.75rem",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.25rem",
-                  }}>
-                    <Star size={12} fill="#D4AF37" color="#D4AF37" />
-                    <span style={{ fontSize: "0.8125rem", fontWeight: "700", color: "#1A1A1A" }}>
-                      {salon.rating}
-                    </span>
-                    <span style={{ fontSize: "0.6875rem", color: "#8A8680" }}>
-                      ({salon.reviews})
-                    </span>
-                  </div>
-                </div>
-
-                {/* Content */}
+        {loading ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem" }}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} style={{ background: "var(--surface)", borderRadius: "1.25rem", overflow: "hidden", border: "1px solid var(--border)", opacity: 0.5 }}>
+                <div style={{ height: "180px", background: "var(--surface-2)" }} />
                 <div style={{ padding: "1.25rem" }}>
-                  <div style={{
-                    fontSize: "0.6875rem",
-                    fontWeight: "600",
-                    color: "#D4AF37",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    marginBottom: "0.375rem",
-                  }}>
-                    {salon.category}
-                  </div>
-                  <h3 style={{
-                    fontFamily: "'Playfair Display', serif",
-                    fontSize: "1.125rem",
-                    fontWeight: "600",
-                    color: "#1A1A1A",
-                    marginBottom: "0.625rem",
-                  }}>
-                    {salon.name}
-                  </h3>
-
-                  <div style={{ display: "flex", gap: "0.75rem", marginBottom: "0.875rem" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                      <MapPin size={12} color="#8A8680" />
-                      <span style={{ fontSize: "0.75rem", color: "#8A8680" }}>{salon.city}</span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                      <Clock size={12} color="#8A8680" />
-                      <span style={{ fontSize: "0.75rem", color: "#8A8680" }}>{salon.turnaround}</span>
-                    </div>
-                  </div>
-
-                  {/* Tags */}
-                  <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap", marginBottom: "1rem" }}>
-                    {salon.tags.map((tag) => (
-                      <span key={tag} style={{
-                        background: "rgba(212,175,55,0.08)",
-                        color: "#8B7A00",
-                        fontSize: "0.6875rem",
-                        fontWeight: "500",
-                        padding: "0.25rem 0.625rem",
-                        borderRadius: "9999px",
-                      }}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}>
-                    <div>
-                      <span style={{ fontSize: "0.75rem", color: "#8A8680" }}>Starting from </span>
-                      <span style={{
-                        fontFamily: "'Playfair Display', serif",
-                        fontSize: "1.125rem",
-                        fontWeight: "700",
-                        color: "#1A1A1A",
-                      }}>
-                        ${salon.startingFrom}
-                      </span>
-                    </div>
-                    <div className="btn-gold" style={{ fontSize: "0.75rem", padding: "0.5rem 1rem" }}>
-                      Book Now
-                    </div>
-                  </div>
+                  <div style={{ height: "16px", background: "var(--surface-2)", borderRadius: "4px", width: "60%", marginBottom: "0.625rem" }} />
+                  <div style={{ height: "13px", background: "var(--surface-2)", borderRadius: "4px", width: "80%" }} />
                 </div>
               </div>
+            ))}
+          </div>
+        ) : businesses.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "4rem", background: "var(--surface)", borderRadius: "1.25rem", border: "2px dashed rgba(212,175,55,0.2)" }}>
+            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>✨</div>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.25rem", color: "var(--charcoal)", marginBottom: "0.5rem" }}>
+              No businesses yet
+            </h3>
+            <p style={{ color: "var(--muted)", marginBottom: "1.5rem" }}>
+              Be the first to list your beauty business on GlowReserve!
+            </p>
+            <Link href="/business/register" className="btn-gold">
+              Register Your Business
             </Link>
-          ))}
-        </div>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem" }}>
+            {businesses.map((biz) => (
+              <Link key={biz.id} href={`/business/${biz.slug}`} style={{ textDecoration: "none" }}>
+                <div style={{ background: "var(--surface)", borderRadius: "1.25rem", overflow: "hidden", border: "1px solid var(--border)", transition: "all 0.25s", cursor: "pointer" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 40px rgba(0,0,0,0.1)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}>
+
+                  {/* Cover image */}
+                  <div style={{ height: "180px", background: "var(--surface-2)", position: "relative", overflow: "hidden" }}>
+                    {biz.cover_image_url ? (
+                      <img src={biz.cover_image_url} alt={biz.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05))", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "3.5rem" }}>
+                        ✨
+                      </div>
+                    )}
+                    {biz.is_verified && (
+                      <div style={{ position: "absolute", top: "0.75rem", left: "0.75rem", background: "rgba(212,175,55,0.95)", color: "white", fontSize: "0.6875rem", fontWeight: "700", padding: "0.2rem 0.625rem", borderRadius: "9999px", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                        <CheckCircle size={11} /> Verified
+                      </div>
+                    )}
+                    {biz.rating > 0 && (
+                      <div style={{ position: "absolute", bottom: "0.75rem", right: "0.75rem", background: "rgba(255,255,255,0.95)", borderRadius: "0.625rem", padding: "0.3rem 0.625rem", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                        <Star size={12} fill="#D4AF37" color="#D4AF37" />
+                        <span style={{ fontSize: "0.8125rem", fontWeight: "700", color: "#1A1A1A" }}>{biz.rating}</span>
+                        <span style={{ fontSize: "0.6875rem", color: "#8A8680" }}>({biz.total_reviews})</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ padding: "1.125rem" }}>
+                    <div style={{ fontSize: "0.6875rem", fontWeight: "700", color: "#D4AF37", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "0.25rem" }}>
+                      {biz.category}
+                    </div>
+                    <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.0625rem", fontWeight: "600", color: "var(--charcoal)", marginBottom: "0.375rem" }}>
+                      {biz.name}
+                    </h3>
+                    {biz.city && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.25rem", marginBottom: "0.5rem" }}>
+                        <MapPin size={12} color="var(--muted)" />
+                        <span style={{ fontSize: "0.8125rem", color: "var(--muted)" }}>{biz.city}</span>
+                      </div>
+                    )}
+                    {biz.description && (
+                      <p style={{ fontSize: "0.8125rem", color: "var(--muted)", lineHeight: "1.5", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", marginBottom: "0.75rem" }}>
+                        {biz.description}
+                      </p>
+                    )}
+                    <div className="btn-gold" style={{ fontSize: "0.8125rem", padding: "0.5rem 1rem", width: "100%", justifyContent: "center" }}>
+                      View & Book
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

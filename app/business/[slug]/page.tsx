@@ -1,27 +1,35 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
 import BusinessProfileClient from "@/components/business/BusinessProfileClient";
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+interface Props {
+  params: { slug: string };
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createServerSupabaseClient();
   const { data } = await supabase
     .from("businesses")
-    .select("name, description")
+    .select("name, description, city, category, cover_image_url")
     .eq("slug", params.slug)
     .single();
 
+  if (!data) return { title: "Business Not Found — GlowReserve" };
+
   return {
-    title: data ? `${data.name} — GlowReserve` : "Business — GlowReserve",
-    description: data?.description || "",
+    title: `${data.name} — GlowReserve`,
+    description: data.description || `Book ${data.category} services at ${data.name} in ${data.city}`,
+    openGraph: {
+      title: `${data.name} — GlowReserve`,
+      description: data.description || `Book ${data.category} services at ${data.name}`,
+      images: data.cover_image_url ? [{ url: data.cover_image_url }] : [],
+    },
   };
 }
 
-export default async function BusinessProfilePage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default async function BusinessProfilePage({ params }: Props) {
   const supabase = await createServerSupabaseClient();
 
   const { data: business } = await supabase
@@ -32,7 +40,12 @@ export default async function BusinessProfilePage({
 
   if (!business) notFound();
 
-  const [{ data: services }, { data: reviews }, { data: staff }] = await Promise.all([
+  const [
+    { data: services },
+    { data: reviews },
+    { data: staff },
+    { data: slots },
+  ] = await Promise.all([
     supabase
       .from("services")
       .select("*")
@@ -50,6 +63,14 @@ export default async function BusinessProfilePage({
       .select("*")
       .eq("business_id", business.id)
       .eq("is_active", true),
+    supabase
+      .from("slots")
+      .select("*")
+      .eq("business_id", business.id)
+      .eq("status", "free")
+      .gte("slot_datetime", new Date().toISOString())
+      .lte("slot_datetime", new Date(Date.now() + 7 * 86400000).toISOString())
+      .order("slot_datetime"),
   ]);
 
   return (
@@ -60,6 +81,7 @@ export default async function BusinessProfilePage({
         services={services || []}
         reviews={reviews || []}
         staff={staff || []}
+        initialSlots={slots || []}
       />
     </>
   );

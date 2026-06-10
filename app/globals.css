@@ -176,3 +176,92 @@ h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; }
     padding: 2rem;
   }
 }
+
+/* ── Responsive breakpoints ── */
+.show-mobile { display: flex !important; }
+.show-desktop { display: none !important; }
+
+@media (min-width: 768px) {
+  .show-mobile { display: none !important; }
+  .show-desktop { display: flex !important; }
+}
+
+/* Page padding responsive */
+.page-content {
+  padding: 1.25rem;
+}
+@media (min-width: 768px) {
+  .page-content {
+    padding: 2rem;
+  }
+}
+
+/* Responsive grid */
+.responsive-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .responsive-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.responsive-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .responsive-grid-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (min-width: 1024px) {
+  .responsive-grid-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+/* Hide/show helpers */
+.desktop-only {
+  display: none;
+}
+@media (min-width: 768px) {
+  .desktop-only {
+    display: flex;
+  }
+}
+
+.mobile-only {
+  display: flex;
+}
+@media (min-width: 768px) {
+  .mobile-only {
+    display: none;
+  }
+}
+
+/* Responsive font sizes */
+.page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+/* Fix for business profile grid on mobile */
+@media (max-width: 1023px) {
+  .lg\:grid-cols-\[1fr_340px\] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Sticky booking widget becomes normal on mobile */
+@media (max-width: 1023px) {
+  [style*="position: sticky"][style*="top: 88px"] {
+    position: relative !important;
+    top: auto !important;
+  }
+}

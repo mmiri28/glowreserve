@@ -9,38 +9,39 @@ export async function POST(req: NextRequest) {
   const { bookingId, businessId, rating, comment } = await req.json();
 
   if (!bookingId || !businessId || !rating) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-  }
-  if (rating < 1 || rating > 5) {
-    return NextResponse.json({ error: "Rating must be 1–5" }, { status: 400 });
+    return NextResponse.json({ error: "Missing fields." }, { status: 400 });
   }
 
-  // Verify the booking belongs to this customer and is completed
+  // Verify booking belongs to customer and is completed
   const { data: booking } = await supabase
-    .from("bookings")
-    .select("id, status, customer_id")
-    .eq("id", bookingId)
-    .eq("customer_id", user.id)
-    .single();
+    .from("bookings").select("id, status, customer_id")
+    .eq("id", bookingId).eq("customer_id", user.id)
+    .maybeSingle();
 
-  if (!booking) return NextResponse.json({ error: "Booking not found" }, { status: 404 });
-  if (booking.status !== "completed") {
-    return NextResponse.json({ error: "Can only review completed bookings" }, { status: 400 });
+  if (!booking) {
+    return NextResponse.json({ error: "Booking not found." }, { status: 404 });
   }
 
-  // Upsert review (unique on booking_id)
-  const { data, error } = await supabase
+  // Check no existing review
+  const { data: existing } = await supabase
+    .from("reviews").select("id").eq("booking_id", bookingId).maybeSingle();
+
+  if (existing) {
+    return NextResponse.json({ error: "You already reviewed this booking." }, { status: 409 });
+  }
+
+  const { data: review, error } = await supabase
     .from("reviews")
-    .upsert({
+    .insert({
       booking_id: bookingId,
       customer_id: user.id,
       business_id: businessId,
       rating,
-      comment: comment || null,
+      comment: comment?.trim() || null,
     })
-    .select()
-    .single();
+    .select().single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ review: data }, { status: 201 });
+
+  return NextResponse.json({ review }, { status: 201 });
 }
