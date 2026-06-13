@@ -11,6 +11,7 @@ interface ReviewModalProps {
   serviceName: string;
   onClose: () => void;
   onSubmitted: () => void;
+  onSuccess?: () => void;
 }
 
 export default function ReviewModal({

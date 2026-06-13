@@ -51,8 +51,8 @@ export default function Footer() {
           ))}
         </div>
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
-          <p style={{ fontSize: "0.8125rem" }}>© 2024 GlowReserve. All rights reserved.</p>
-          <p style={{ fontSize: "0.8125rem" }}>Crafted with ✦ for beauty lovers everywhere</p>
+          <p style={{ fontSize: "0.8125rem" }}>© 2026 Mmiri28. All rights reserved.</p>
+          <p style={{ fontSize: "0.8125rem" }}>Look nice</p>
         </div>
       </div>
     </footer>
