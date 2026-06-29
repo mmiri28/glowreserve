@@ -72,7 +72,7 @@ export default function Navbar() {
         >
           {/* Logo */}
          <a
-  href="https://glamreserve.mmiri28.com"
+  href="https://www.mmiri28.com"
   style={{
     display: "flex",
     alignItems: "center",
