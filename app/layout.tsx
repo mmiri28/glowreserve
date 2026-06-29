@@ -23,6 +23,7 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
+        
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#D4AF37" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
