@@ -642,7 +642,7 @@ export default function BookPage() {
                               <span
                                 style={{ fontWeight: "700", color: "#D4AF37" }}
                               >
-                                ${svc.price}
+                                ₦{svc.price}
                               </span>
                             )}
                           </button>
@@ -971,7 +971,7 @@ export default function BookPage() {
                       {
                         icon: <span style={{ color: "#D4AF37" }}>$</span>,
                         label: "Price",
-                        value: `$${booking.servicePrice}`,
+                        value: `₦${booking.servicePrice}`,
                       },
                     ]
                   : []),

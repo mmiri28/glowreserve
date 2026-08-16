@@ -55,7 +55,7 @@ export default function AdminBookingsPage() {
           { label: "Completed", value: bookings.filter(b => b.status === "completed").length, color: "#4CAF7C" },
           { label: "Pending", value: bookings.filter(b => b.status === "pending").length, color: "#D4AF37" },
           { label: "Cancelled", value: bookings.filter(b => b.status === "cancelled").length, color: "#E85C5C" },
-          { label: "Revenue", value: `$${totalRevenue.toFixed(0)}`, color: "#4CAF7C" },
+          { label: "Revenue", value: `₦${totalRevenue.toLocaleString()}`, color: "#4CAF7C" },
         ].map(s => (
           <div key={s.label} className="kpi-card">
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.5rem", fontWeight: "700", color: s.color, marginBottom: "0.25rem" }}>
@@ -109,7 +109,7 @@ export default function AdminBookingsPage() {
                 </div>
                 <p style={{ fontSize: "0.8125rem", color: "var(--muted)" }}>
                   {b.services?.name}
-                  {b.services?.price && <span style={{ color: "#4CAF7C", fontWeight: "600", marginLeft: "0.5rem" }}>${b.services.price}</span>}
+                  {b.services?.price && <span style={{ color: "#4CAF7C", fontWeight: "600", marginLeft: "0.5rem" }}>₦{Number(b.services?.price).toLocaleString()}</span>}
                 </p>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>

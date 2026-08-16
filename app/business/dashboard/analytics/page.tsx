@@ -135,8 +135,8 @@ export default async function AnalyticsPage() {
     {
       icon: <DollarSign size={22} color="#4CAF7C" />,
       label: "Revenue This Month",
-      value: `$${monthlyRevenue.toFixed(0)}`,
-      sub: `$${totalRevenue.toFixed(0)} total all time`,
+      value: `₦${monthlyRevenue.toLocaleString()}`,
+      sub: `₦${totalRevenue.toLocaleString()} total all time`,
       trend: 0,
       bg: "rgba(76,175,124,0.08)",
     },
@@ -256,7 +256,7 @@ export default async function AnalyticsPage() {
                       <span style={{ fontSize: "0.9375rem", fontWeight: "600", color: "var(--charcoal)" }}>{svc.name}</span>
                       <div style={{ display: "flex", gap: "1rem" }}>
                         <span style={{ fontSize: "0.875rem", color: "var(--muted)" }}>{svc.count} bookings</span>
-                        {svc.revenue > 0 && <span style={{ fontSize: "0.875rem", fontWeight: "700", color: "#4CAF7C" }}>${svc.revenue.toFixed(0)}</span>}
+                        {svc.revenue > 0 && <span style={{ fontSize: "0.875rem", fontWeight: "700", color: "#4CAF7C" }}>₦{svc.revenue.toLocaleString()}</span>}
                       </div>
                     </div>
                     <div style={{ height: "6px", background: "var(--surface-2)", borderRadius: "9999px", overflow: "hidden" }}>
@@ -307,7 +307,7 @@ export default async function AnalyticsPage() {
                 <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
                   {b.services?.price && (
                     <span style={{ fontWeight: "700", color: "#4CAF7C", fontSize: "0.9375rem" }}>
-                      ${Number(b.services.price).toFixed(0)}
+                      ₦{Number(b.services.price).toLocaleString()}
                     </span>
                   )}
                   <span style={{ fontSize: "0.8125rem", color: "var(--muted)" }}>

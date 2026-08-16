@@ -259,7 +259,7 @@ export default function BusinessProfileClient({
               )}
               {minPrice !== Infinity && (
                 <span style={{ fontSize: "0.9rem", color: "var(--muted)" }}>
-                  From <strong style={{ color: "var(--charcoal)" }}>${minPrice}</strong>
+                  From <strong style={{ color: "var(--charcoal)" }}>₦{minPrice}</strong>
                 </span>
               )}
             </div>
@@ -378,7 +378,7 @@ export default function BusinessProfileClient({
                                 fontFamily: "'Playfair Display', serif",
                                 fontSize: "1.375rem", fontWeight: "700", color: "#D4AF37",
                               }}>
-                                ${Number(svc.price).toFixed(0)}
+                                ₦{Number(svc.price).toLocaleString()}
                               </div>
                               <div style={{ fontSize: "0.6875rem", color: "var(--muted)" }}>per session</div>
                             </div>
@@ -635,7 +635,7 @@ export default function BusinessProfileClient({
                     </p>
                     {selectedService.price != null && (
                       <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.125rem", fontWeight: "700", color: "var(--charcoal)" }}>
-                        ${Number(selectedService.price).toFixed(0)}
+                        ${Number(selectedService.price).toLocaleString()}
                       </span>
                     )}
                   </div>
@@ -719,7 +719,7 @@ export default function BusinessProfileClient({
                       </p>
                     </div>
                     <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.25rem", fontWeight: "700", color: "#D4AF37" }}>
-                      ${Number(selectedService.price).toFixed(0)}
+                      ${Number(selectedService.price).toLocaleString()}
                     </p>
                   </div>
                 )}
@@ -830,7 +830,7 @@ function DayAvailability({
                     border: "1px solid var(--border)",
                   }}>
                     <span style={{ color: "var(--charcoal)", fontWeight: "600" }}>{svc.name}</span>
-                    <span style={{ color: "#D4AF37", fontWeight: "700" }}>${Number(svc.price).toFixed(0)}</span>
+                    <span style={{ color: "#D4AF37", fontWeight: "700" }}>₦{Number(svc.price).toLocaleString()}</span>
                   </span>
                 ))}
               </div>

@@ -488,7 +488,7 @@ export default function AppointmentsPage() {
                           color: "#4CAF7C",
                         }}
                       >
-                        ${Number(booking.services.price).toFixed(2)}
+                        ₦{Number(booking.services.price).toLocaleString()}
                       </div>
                     )}
                   </div>

@@ -275,7 +275,7 @@ export default function BusinessAppointmentsPage() {
                           {booking.services?.name}
                           {booking.services?.price && (
                             <span style={{ color: "#4CAF7C", fontWeight: "700", marginLeft: "0.5rem" }}>
-                              ${Number(booking.services.price).toFixed(2)}
+                              ₦{Number(booking.services.price).toLocaleString()}
                             </span>
                           )}
                         </p>
