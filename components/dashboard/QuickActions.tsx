@@ -11,16 +11,26 @@ export default function NotFound() {
       padding: "2rem", textAlign: "center",
     }}>
       {/* Logo */}
-      <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none", marginBottom: "3rem" }}>
-        <div style={{ width: "36px", height: "36px", borderRadius: "9px", background: "linear-gradient(135deg, #D4AF37, #B8941F)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <Link href="/" style={{
+        display: "flex", alignItems: "center", gap: "0.5rem",
+        textDecoration: "none", marginBottom: "3rem",
+      }}>
+        <div style={{
+          width: "36px", height: "36px", borderRadius: "9px",
+          background: "linear-gradient(135deg, #D4AF37, #B8941F)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
           <Sparkles size={18} color="white" />
         </div>
-        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.25rem", fontWeight: "700", color: "var(--charcoal)" }}>
+        <span style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: "1.25rem", fontWeight: "700", color: "var(--charcoal)",
+        }}>
           Glow<span style={{ color: "#D4AF37" }}>Reserve</span>
         </span>
       </Link>
 
-      {/* 404 */}
+      {/* 404 number */}
       <div style={{
         fontFamily: "'Playfair Display', serif",
         fontSize: "clamp(5rem, 20vw, 9rem)",
@@ -36,8 +46,7 @@ export default function NotFound() {
       <h1 style={{
         fontFamily: "'Playfair Display', serif",
         fontSize: "clamp(1.5rem, 4vw, 2rem)",
-        fontWeight: "700", color: "var(--charcoal)",
-        marginBottom: "0.75rem",
+        fontWeight: "700", color: "var(--charcoal)", marginBottom: "0.75rem",
       }}>
         Page Not Found
       </h1>
@@ -49,7 +58,10 @@ export default function NotFound() {
         Looks like this page doesn&apos;t exist. It may have been moved or deleted.
       </p>
 
-      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
+      <div style={{
+        display: "flex", gap: "1rem",
+        flexWrap: "wrap", justifyContent: "center",
+      }}>
         <Link href="/" style={{
           display: "inline-flex", alignItems: "center", gap: "0.5rem",
           padding: "0.75rem 1.5rem", borderRadius: "0.875rem",
