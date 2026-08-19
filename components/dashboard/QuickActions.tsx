@@ -1,81 +1,100 @@
-import Link from "next/link";
-import { Sparkles, ArrowLeft, Search } from "lucide-react";
+"use client";
 
-export default function NotFound() {
+import { useRouter } from "next/navigation";
+
+const CATEGORIES = [
+  { image: "/categories/hair2.jfif", label: "Book Hair", category: "Hair" },
+  { image: "/categories/nails.jfif", label: "Book Nails", category: "Nails" },
+  { image: "/categories/spa.jfif", label: "Book Spa", category: "Spa" },
+  { image: "/categories/makeup.jfif", label: "Book Makeup", category: "Makeup" },
+  { image: "/categories/brows.jfif", label: "Book Lashes", category: "Lashes" },
+  { image: "/categories/barbing.jfif", label: "Book Barbing", category: "Barbing" },
+  { image: "/categories/skincare.jfif", label: "Book Skincare", category: "Skincare" },
+  { image: "/categories/massageaux.jfif", label: "Book Massage", category: "Massage" },
+];
+
+export default function QuickActions() {
+  const router = useRouter();
+
   return (
     <div style={{
-      minHeight: "100vh",
-      background: "var(--cream)",
-      display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
-      padding: "2rem", textAlign: "center",
+      display: "grid",
+      gridTemplateColumns: "repeat(4, 1fr)",
+      gap: "0.75rem",
+      marginBottom: "1.5rem",
     }}>
-      {/* Logo */}
-      <Link href="/" style={{
-        display: "flex", alignItems: "center", gap: "0.5rem",
-        textDecoration: "none", marginBottom: "3rem",
-      }}>
-        <div style={{
-          width: "36px", height: "36px", borderRadius: "9px",
-          background: "linear-gradient(135deg, #D4AF37, #B8941F)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <Sparkles size={18} color="white" />
-        </div>
-        <span style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: "1.25rem", fontWeight: "700", color: "var(--charcoal)",
-        }}>
-          Glow<span style={{ color: "#D4AF37" }}>Reserve</span>
-        </span>
-      </Link>
+      {CATEGORIES.map((item) => (
+        <button
+          key={item.category}
+          onClick={() => router.push(`/explore?category=${encodeURIComponent(item.category)}`)}
+          style={{
+            position: "relative",
+            borderRadius: "1rem",
+            border: "2px solid transparent",
+            cursor: "pointer",
+            fontFamily: "inherit",
+            padding: 0,
+            overflow: "hidden",
+            height: "110px",
+            transition: "all 0.2s",
+            background: "var(--surface-2)",
+          }}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget as HTMLElement;
+            el.style.borderColor = "#D4AF37";
+            el.style.transform = "translateY(-3px)";
+            el.style.boxShadow = "0 8px 24px rgba(212,175,55,0.2)";
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget as HTMLElement;
+            el.style.borderColor = "transparent";
+            el.style.transform = "translateY(0)";
+            el.style.boxShadow = "none";
+          }}
+        >
+          {/* Background image using plain img tag — works with jfif */}
+          <img
+            src={item.image}
+            alt={item.label}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+            onError={(e) => {
+              // If image fails, show a coloured background instead
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
+          />
 
-      {/* 404 number */}
-      <div style={{
-        fontFamily: "'Playfair Display', serif",
-        fontSize: "clamp(5rem, 20vw, 9rem)",
-        fontWeight: "700", lineHeight: 1,
-        background: "linear-gradient(135deg, #D4AF37, #B8941F)",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        marginBottom: "1.5rem",
-      }}>
-        404
-      </div>
+          {/* Dark overlay so text is readable */}
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 60%)",
+          }} />
 
-      <h1 style={{
-        fontFamily: "'Playfair Display', serif",
-        fontSize: "clamp(1.5rem, 4vw, 2rem)",
-        fontWeight: "700", color: "var(--charcoal)", marginBottom: "0.75rem",
-      }}>
-        Page Not Found
-      </h1>
-
-      <p style={{
-        color: "var(--muted)", fontSize: "1.0625rem",
-        marginBottom: "2.5rem", maxWidth: "420px", lineHeight: "1.7",
-      }}>
-        Looks like this page doesn&apos;t exist. It may have been moved or deleted.
-      </p>
-
-      <div style={{
-        display: "flex", gap: "1rem",
-        flexWrap: "wrap", justifyContent: "center",
-      }}>
-        <Link href="/" style={{
-          display: "inline-flex", alignItems: "center", gap: "0.5rem",
-          padding: "0.75rem 1.5rem", borderRadius: "0.875rem",
-          border: "1px solid var(--border)", background: "var(--surface)",
-          color: "var(--charcoal)", textDecoration: "none",
-          fontWeight: "600", fontSize: "0.9375rem",
-        }}>
-          <ArrowLeft size={16} /> Back to Home
-        </Link>
-        <Link href="/explore" className="btn-gold">
-          <Search size={16} style={{ marginRight: "0.375rem" }} />
-          Explore Businesses
-        </Link>
-      </div>
+          {/* Label */}
+          <span style={{
+            position: "absolute",
+            bottom: "0.625rem",
+            left: 0,
+            right: 0,
+            textAlign: "center",
+            fontSize: "0.75rem",
+            fontWeight: "700",
+            color: "white",
+            letterSpacing: "0.02em",
+            textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+            padding: "0 0.25rem",
+          }}>
+            {item.label}
+          </span>
+        </button>
+      ))}
     </div>
   );
 }

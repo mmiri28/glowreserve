@@ -133,14 +133,14 @@ export default async function DashboardHome() {
       )}
 
       {/* Quick Book */}
-      <h2 style={{
-        fontFamily: "'Playfair Display', serif",
-        fontSize: "1.125rem", fontWeight: "600",
-        color: "var(--charcoal)", marginBottom: "1rem",
-      }}>
-        Quick Book
-      </h2>
-      <QuickActions />
+ <h2 style={{
+  fontFamily: "'Playfair Display', serif",
+  fontSize: "1.125rem", fontWeight: "600",
+  color: "var(--charcoal)", marginBottom: "1rem",
+}}>
+  Quick Book
+</h2>
+<QuickActions />
 
       {/* Upcoming list */}
       {upcomingBookings.length > 1 && (
