@@ -150,7 +150,7 @@ export default function Navbar() {
           >
             {[
               { label: "Explore", href: "/explore" },
-              { label: "For Business", href: "/business/register" },
+              { label: "For Business", href: "/for-business" },
             ].map((item) => (
               <Link
                 key={item.label}
