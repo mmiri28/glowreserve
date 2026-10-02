@@ -134,7 +134,7 @@ Complete → in-app "Leave a Review" prompt
 ## 🌐 Deploy
 
 ```bash
-vercel --prod
+Netlify --prod
 ```
 
 Add all env vars to Vercel dashboard. Cron (`vercel.json`) runs every minute.
