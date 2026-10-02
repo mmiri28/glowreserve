@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -23,6 +23,39 @@ function slugify(text: string) {
 
 export default function BusinessRegisterPage() {
   const router = useRouter();
+  useEffect(() => {
+  const checkAccess = async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      // Not logged in — send to get-started
+      router.push("/auth/get-started");
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile?.role === "customer") {
+      // Customers cannot create a business
+      router.push("/dashboard");
+      return;
+    }
+
+    if (profile?.role === "admin") {
+      router.push("/admin");
+      return;
+    }
+  };
+
+  checkAccess();
+}, []);
+// ── END OF BLOCK ──
+
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({

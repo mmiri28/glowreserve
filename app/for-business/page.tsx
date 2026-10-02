@@ -1,11 +1,45 @@
 "use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import {
   Calendar, Star, Users, TrendingUp,
   CheckCircle, ArrowRight, Sparkles,
 } from "lucide-react";
 
 export default function ForBusinessPage() {
+  const router = useRouter();
+  const [checking, setChecking] = useState(false);
+
+  const handleCTA = async () => {
+    setChecking(true);
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      // Logged in — check if they already have a business
+      const { data: business } = await supabase
+        .from("businesses")
+        .select("id")
+        .eq("owner_id", user.id)
+        .maybeSingle();
+
+      if (business) {
+        // Already has a business — go to dashboard
+        router.push("/business/dashboard");
+      } else {
+        // Logged in but no business yet — go to register
+        router.push("/business/register");
+      }
+    } else {
+      // Not logged in — show get-started gate
+      router.push("/auth/get-started");
+    }
+    setChecking(false);
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--cream)" }}>
 
@@ -37,14 +71,25 @@ export default function ForBusinessPage() {
             <span style={{ color: "#D4AF37", display: "block" }}>With GlowReserve</span>
           </h1>
 
-          <p style={{ fontSize: "clamp(1rem, 2.5vw, 1.1875rem)", color: "rgba(255,255,255,0.6)", lineHeight: "1.75", marginBottom: "2.5rem", maxWidth: "520px", margin: "0 auto 2.5rem" }}>
+          <p style={{
+            fontSize: "clamp(1rem, 2.5vw, 1.1875rem)",
+            color: "rgba(255,255,255,0.6)", lineHeight: "1.75",
+            marginBottom: "2.5rem", maxWidth: "520px", margin: "0 auto 2.5rem",
+          }}>
             Join hundreds of salons, spas, and beauty professionals already using GlowReserve to manage bookings, attract new clients, and grow their revenue.
           </p>
 
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/auth/register?role=business_owner" className="btn-gold" style={{ fontSize: "1rem", padding: "0.9375rem 2rem" }}>
-              List Your Business Free →
-            </Link>
+            {/* Main CTA — checks auth */}
+            <button
+              onClick={handleCTA}
+              disabled={checking}
+              className="btn-gold"
+              style={{ fontSize: "1rem", padding: "0.9375rem 2rem", opacity: checking ? 0.75 : 1 }}
+            >
+              {checking ? "Checking..." : "List Your Business Free →"}
+            </button>
+
             <Link href="/explore" style={{
               display: "inline-flex", alignItems: "center", gap: "0.5rem",
               padding: "0.9375rem 2rem", borderRadius: "0.875rem",
@@ -151,7 +196,7 @@ export default function ForBusinessPage() {
         </div>
       </section>
 
-      {/* How it works for businesses */}
+      {/* How it works */}
       <section style={{ background: "var(--surface)", padding: "5rem 1.5rem", borderTop: "1px solid var(--border)" }}>
         <div style={{ maxWidth: "860px", margin: "0 auto", textAlign: "center" }}>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: "700", color: "var(--charcoal)", marginBottom: "0.75rem" }}>
@@ -191,7 +236,7 @@ export default function ForBusinessPage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* Bottom CTA */}
       <section style={{
         background: "linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%)",
         padding: "5rem 1.5rem",
@@ -204,9 +249,17 @@ export default function ForBusinessPage() {
           <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "1.0625rem", marginBottom: "2rem", lineHeight: "1.7" }}>
             Join GlowReserve today. It&apos;s completely free to list your business and start accepting bookings.
           </p>
-          <Link href="/auth/register" className="btn-gold" style={{ fontSize: "1.0625rem", padding: "1rem 2.5rem" }}>
-            Get Started Free <ArrowRight size={18} style={{ marginLeft: "0.375rem" }} />
-          </Link>
+
+          {/* Bottom CTA — also checks auth */}
+          <button
+            onClick={handleCTA}
+            disabled={checking}
+            className="btn-gold"
+            style={{ fontSize: "1.0625rem", padding: "1rem 2.5rem", opacity: checking ? 0.75 : 1 }}
+          >
+            {checking ? "Checking..." : <>Get Started Free <ArrowRight size={18} style={{ marginLeft: "0.375rem" }} /></>}
+          </button>
+
           <p style={{ marginTop: "1.25rem", fontSize: "0.875rem", color: "rgba(255,255,255,0.3)" }}>
             No credit card required · Free forever plan available
           </p>
