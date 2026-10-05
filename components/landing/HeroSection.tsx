@@ -2,13 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, MapPin, Star, ArrowRight } from "lucide-react";
+import { Search, MapPin, ArrowRight, Check, ShieldCheck } from "lucide-react";
 
-const STATS = [
-  { value: "2,400+", label: "Verified Businesses" },
-  { value: "48k+", label: "Happy Clients" },
-  { value: "4.9", label: "Average Rating" },
-];
+// What the platform guarantees today — keep these true.
+const PROMISES = ["Verified professionals", "Instant confirmation", "Reviews from real clients"];
 
 export default function HeroSection() {
   const [query, setQuery] = useState("");
@@ -54,7 +51,7 @@ export default function HeroSection() {
         pointerEvents: "none",
       }} />
 
-      {/* Floating review card */}
+      {/* Floating verification card */}
       <div style={{
         position: "absolute",
         top: "22%",
@@ -69,15 +66,11 @@ export default function HeroSection() {
         zIndex: 2,
       }}
         className="hidden lg:block">
-        <div style={{ display: "flex", gap: "0.25rem", marginBottom: "0.5rem" }}>
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} size={12} fill="#D4AF37" color="#D4AF37" />
-          ))}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", marginBottom: "0.375rem" }}>
+          <ShieldCheck size={16} color="#D4AF37" />
+          <p style={{ fontSize: "0.75rem", color: "#1A1A1A", fontWeight: "600" }}>Verified professional</p>
         </div>
-        <p style={{ fontSize: "0.75rem", color: "#1A1A1A", fontWeight: "500", marginBottom: "0.25rem" }}>
-          "Absolutely stunning lash work!"
-        </p>
-        <p style={{ fontSize: "0.6875rem", color: "#8A8680" }}>— Sarah M.</p>
+        <p style={{ fontSize: "0.6875rem", color: "#8A8680" }}>Identity checked before taking bookings</p>
       </div>
 
       {/* Floating booking card */}
@@ -137,7 +130,7 @@ export default function HeroSection() {
             marginBottom: "1.25rem",
           }}
             className="animate-slide-up">
-            Your Beauty,
+            Reserve your
             <br />
             <span style={{
               background: "linear-gradient(135deg, #D4AF37, #B8941F)",
@@ -145,8 +138,8 @@ export default function HeroSection() {
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
             }}>
-              Effortlessly
-            </span>{" "}Booked
+              glow.
+            </span>
           </h1>
 
           <p style={{
@@ -157,7 +150,7 @@ export default function HeroSection() {
             maxWidth: "520px",
           }}
             className="animate-slide-up">
-            Discover top-rated salons, spas, and beauty studios near you. Book your perfect appointment in seconds — no calls, no waiting.
+            Book trusted beauty and grooming professionals in seconds, with no calls and no waiting.
           </p>
 
           {/* Search Form */}
@@ -224,25 +217,15 @@ export default function HeroSection() {
             </button>
           </form>
 
-          {/* Stats */}
-          <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap" }} className="animate-fade-in">
-            {STATS.map((stat) => (
-              <div key={stat.label}>
-                <div style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: "1.625rem",
-                  fontWeight: "700",
-                  color: "#1A1A1A",
-                  lineHeight: "1.2",
-                }}>
-                  {stat.value}
-                </div>
-                <div style={{ fontSize: "0.8125rem", color: "#8A8680", marginTop: "0.125rem" }}>
-                  {stat.label}
-                </div>
-              </div>
+          {/* Promises */}
+          <ul style={{ display: "flex", gap: "0.75rem 1.75rem", flexWrap: "wrap", listStyle: "none", padding: 0, margin: 0 }} className="animate-fade-in">
+            {PROMISES.map((p) => (
+              <li key={p} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.9375rem", fontWeight: "500", color: "#1A1A1A" }}>
+                <Check size={16} color="#D4AF37" strokeWidth={2.5} />
+                {p}
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </div>
     </section>

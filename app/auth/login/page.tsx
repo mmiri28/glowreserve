@@ -254,15 +254,15 @@ export default function LoginPage() {
               }}
             >
               {[
-                ["2,400+", "Providers"],
-                ["48k+", "Bookings"],
-                ["4.9★", "Rating"],
+                ["Verified", "Professionals"],
+                ["Instant", "Confirmation"],
+                ["Real", "Client reviews"],
               ].map(([val, label]) => (
                 <div key={label} style={{ textAlign: "center" }}>
                   <div
                     style={{
                       fontFamily: "'Playfair Display', serif",
-                      fontSize: "1.5rem",
+                      fontSize: "1.25rem",
                       fontWeight: "700",
                       color: "#D4AF37",
                     }}
