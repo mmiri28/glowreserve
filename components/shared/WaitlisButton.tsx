@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Bell, BellOff, Clock, X } from "lucide-react";
 import toast from "react-hot-toast";
+import { WAITLIST_ENABLED } from "@/lib/features";
 
 interface WaitlistButtonProps {
   businessId: string;
@@ -11,7 +12,13 @@ interface WaitlistButtonProps {
   onJoined?: () => void;
 }
 
-export default function WaitlistButton({
+// Hidden while WAITLIST_ENABLED is false (see lib/features.ts).
+export default function WaitlistButton(props: WaitlistButtonProps) {
+  if (!WAITLIST_ENABLED) return null;
+  return <WaitlistButtonInner {...props} />;
+}
+
+function WaitlistButtonInner({
   businessId,
   serviceId,
   date,

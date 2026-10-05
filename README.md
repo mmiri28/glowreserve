@@ -1,6 +1,6 @@
 # ✨ GlowReserve — Premium Beauty & Wellness Marketplace
 
-A full-stack, production-ready beauty booking marketplace built with **Next.js 14**, **Supabase**, **Resend**, and **Twilio**.
+A full-stack, production-ready beauty booking marketplace built with **Next.js 16**, **Supabase**, **Resend**, and **Twilio**.
 
 ---
 
@@ -8,14 +8,14 @@ A full-stack, production-ready beauty booking marketplace built with **Next.js 1
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 14 (App Router) + TypeScript |
+| Frontend | Next.js 16 (App Router) + TypeScript |
 | Styling | Tailwind CSS + custom design system |
 | Database | Supabase (PostgreSQL) |
 | Auth | Supabase Auth |
 | Email | Resend |
 | SMS | Twilio |
 | Charts | Recharts |
-| Deployment | Vercel |
+| Deployment | Netlify |
 
 ---
 
@@ -32,7 +32,7 @@ npm install
 ### 2. Environment variables
 
 ```bash
-cp .env.local.example .env.local
+cp .env.example .env.local
 ```
 
 Fill in:
@@ -52,9 +52,14 @@ CRON_SECRET=your-secret-cron-token
 
 ### 3. Set up Supabase
 
-Run in **SQL Editor**:
-1. `supabase/schema.sql` — tables, RLS, triggers
-2. `supabase/seed.sql` — demo data (update owner UUIDs first)
+Run in the **SQL Editor**, in this order:
+1. `supabase/schema.sql` — base tables, RLS, triggers
+2. `supabase/02_reconcile_and_security.sql` — verification, waitlist and staff-hours tables, storage buckets, admin access, security fixes, and the pg_cron job that releases expired holds
+3. `supabase/seed.sql` — demo data (optional; update owner UUIDs first)
+
+To make the first admin: sign up normally, then in the SQL Editor run
+`update profiles set role = 'admin' where username = '<your-username>';`
+Admins can promote other users from `/admin/users` after that.
 
 ### 4. Run
 
@@ -114,7 +119,15 @@ Complete → in-app "Leave a Review" prompt
 ### Security
 - RLS on every table
 - Service role key server-side only
-- CRON_SECRET protects cron endpoint
+- Roles are set at signup by the database trigger (customer or business_owner only). Only admins can change roles or approve verification.
+- Business owners cannot verify their own business or edit their rating.
+- Logged-out visitors cannot read phone numbers.
+- CRON_SECRET protects the cron endpoint
+
+**Known limits**
+- A logged-in user can still read the phone number of a business owner, an admin, or a customer who has written a review. Fully hiding phone numbers needs them moved to a separate private table.
+- The waitlist is switched off (`lib/features.ts`) until `/api/waitlist` and the waitlist notification job are built.
+- Appointment reminders are not built yet.
 
 ---
 
@@ -133,8 +146,5 @@ Complete → in-app "Leave a Review" prompt
 
 ## 🌐 Deploy
 
-```bash
-Netlify --prod
-```
-
-Add all env vars to Vercel dashboard. Cron (`vercel.json`) runs every minute.
+Netlify detects Next.js automatically. Add the variables from `.env.example` under Site configuration → Environment variables, then deploy.
+No external cron is needed: expired holds are released by pg_cron inside Supabase.

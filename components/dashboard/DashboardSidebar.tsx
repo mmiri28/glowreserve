@@ -11,12 +11,13 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import ThemeToggle from "@/components/shared/ThemeToggle";
 import type { Profile } from "@/types/database";
+import { WAITLIST_ENABLED } from "@/lib/features";
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Home", href: "/dashboard" },
   { icon: Calendar, label: "My Appointments", href: "/dashboard/appointments" },
   { icon: Search, label: "Book a Service", href: "/dashboard/book" },
-  { icon: Clock, label: "My Waitlist", href: "/dashboard/waitlist" },
+  ...(WAITLIST_ENABLED ? [{ icon: Clock, label: "My Waitlist", href: "/dashboard/waitlist" }] : []),
   { icon: Bell, label: "Notifications", href: "/dashboard/notifications" },
   { icon: User, label: "Profile", href: "/dashboard/profile" },
 ];
