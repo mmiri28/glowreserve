@@ -71,7 +71,7 @@ export default function RegisterPage() {
 
     // Step 2: Create the auth user
     const supabase = createClient();
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email: form.email.trim().toLowerCase(),
       password: form.password,
       options: {
@@ -79,6 +79,7 @@ export default function RegisterPage() {
           username: form.username.toLowerCase(),
           full_name: form.full_name.trim(),
           role: role,
+          phone: form.phone.trim() || null,
         },
       },
     });
@@ -99,40 +100,10 @@ export default function RegisterPage() {
       return;
     }
 
-   if (data.user) {
-  // Force-save the role via server API (bypasses RLS, overwrites trigger)
-  await fetch("/api/auth/set-role", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId: data.user.id,
-      role: role,
-      username: form.username.toLowerCase(),
-      fullName: form.full_name.trim(),
-      phone: form.phone.trim() || null,
-    }),
-  });
-
-const firstName = form.full_name.trim().split(" ")[0] || "there";
-toast.success(`Account created successfully. Welcome, ${firstName}! 🎉`);
-
-  if (role === "business_owner") {
-    router.push("/business/register");
-  } else {
-    router.push("/dashboard");
-  }
-}
-
-    // Step 3: Update phone separately (trigger doesn't handle it)
-    if (form.phone) {
-      await supabase
-        .from("profiles")
-        .update({ phone: form.phone.trim() })
-        .eq("id", data.user.id);
-    }
-
-const firstName = form.full_name.trim().split(" ")[0] || "there";
-toast.success(`Account created successfully. Welcome, ${firstName}! 🎉`);
+    // Role, username, full name and phone are saved by the database
+    // trigger (handle_new_user) from the signup data above.
+    const firstName = form.full_name.trim().split(" ")[0] || "there";
+    toast.success(`Account created successfully. Welcome, ${firstName}! 🎉`);
 
     // Redirect based on role
     if (role === "business_owner") {
