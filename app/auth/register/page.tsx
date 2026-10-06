@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, ArrowLeft, Lock, Sparkles, Check } from "lucide-react";
@@ -11,6 +11,12 @@ type Role = "customer" | "business_owner";
 
 export default function RegisterPage() {
   const [role, setRole] = useState<Role>("customer");
+
+  // /auth/register?role=business_owner opens with "Business" selected.
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("role");
+    if (requested === "business_owner") setRole("business_owner");
+  }, []);
   const [form, setForm] = useState({
     username: "",
     full_name: "",

@@ -177,7 +177,7 @@ export default function Navbar() {
                 <Link href="/auth/login" className="btn-ghost" style={{ fontSize: "0.8125rem", padding: "0.5rem 1.25rem" }}>
                   Sign In
                 </Link>
-                <Link href="/auth/get-started" className="btn-gold" style={{ fontSize: "0.8125rem", padding: "0.5rem 1.25rem" }}>
+                <Link href="/auth/register" className="btn-gold" style={{ fontSize: "0.8125rem", padding: "0.5rem 1.25rem" }}>
                   Get Started
                 </Link>
               </>
@@ -239,7 +239,7 @@ export default function Navbar() {
                 <Link href="/auth/login" className="btn-ghost" style={{ flex: 1, justifyContent: "center", fontSize: "0.875rem" }} onClick={() => setIsOpen(false)}>
                   Sign In
                 </Link>
-                <Link href="/auth/get-started" className="btn-gold" style={{ flex: 1, justifyContent: "center", fontSize: "0.875rem" }} onClick={() => setIsOpen(false)}>
+                <Link href="/auth/register" className="btn-gold" style={{ flex: 1, justifyContent: "center", fontSize: "0.875rem" }} onClick={() => setIsOpen(false)}>
                   Get Started
                 </Link>
               </div>

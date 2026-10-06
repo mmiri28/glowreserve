@@ -34,8 +34,8 @@ export default function ForBusinessPage() {
         router.push("/business/register");
       }
     } else {
-      // Not logged in — show get-started gate
-      router.push("/auth/get-started");
+      // Not logged in — send to sign-up with "Business" preselected
+      router.push("/auth/register?role=business_owner");
     }
     setChecking(false);
   };

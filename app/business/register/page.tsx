@@ -29,8 +29,8 @@ export default function BusinessRegisterPage() {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      // Not logged in — send to get-started
-      router.push("/auth/get-started");
+      // Not logged in — send to sign-up with "Business" preselected
+      router.push("/auth/register?role=business_owner");
       return;
     }
 
