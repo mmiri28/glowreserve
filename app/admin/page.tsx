@@ -43,9 +43,9 @@ export default async function AdminDashboard() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
         {KPIs.map((kpi) => (
           <Link key={kpi.label} href={kpi.href} style={{ textDecoration: "none" }}>
-            <div className="kpi-card" style={{ cursor: "pointer", transition: "all 0.2s" }}
-              onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.borderColor = "#D4AF37"}
-              onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"}>
+            {/* Hover style lives in globals.css (.kpi-link): event handlers
+                are not allowed in a server component and crash the page. */}
+            <div className="kpi-card kpi-link" style={{ cursor: "pointer", transition: "all 0.2s" }}>
               <div style={{ width: "44px", height: "44px", borderRadius: "0.75rem", background: kpi.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>
                 {kpi.icon}
               </div>
@@ -114,10 +114,10 @@ export default async function AdminDashboard() {
                 </div>
                 <span style={{
                   fontSize: "0.75rem", fontWeight: "600", padding: "0.2rem 0.625rem", borderRadius: "9999px",
-                  background: u.role === "business_owner" ? "rgba(212,175,55,0.1)" : "rgba(91,141,239,0.1)",
-                  color: u.role === "business_owner" ? "#D4AF37" : "#5B8DEF",
+                  background: u.role === "admin" ? "rgba(26,26,26,0.08)" : u.role === "business_owner" ? "rgba(212,175,55,0.1)" : "rgba(91,141,239,0.1)",
+                  color: u.role === "admin" ? "var(--charcoal)" : u.role === "business_owner" ? "#D4AF37" : "#5B8DEF",
                 }}>
-                  {u.role === "business_owner" ? "Business" : "Customer"}
+                  {u.role === "admin" ? "Admin" : u.role === "business_owner" ? "Business" : "Customer"}
                 </span>
               </div>
             ))}

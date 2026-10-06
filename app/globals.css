@@ -265,3 +265,6 @@ h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; }
     top: auto !important;
   }
 }
+
+/* Admin overview: clickable KPI cards */
+.kpi-link:hover { border-color: #D4AF37; }
