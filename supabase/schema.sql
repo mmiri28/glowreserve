@@ -259,7 +259,7 @@ CREATE POLICY "Notifications: user can mark read"
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO profiles (id, username, full_name)
+  INSERT INTO public.profiles (id, username, full_name)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'username', 'user_' || substr(NEW.id::text, 1, 8)),
@@ -267,7 +267,7 @@ BEGIN
   );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';  -- sign-up runs with search_path=auth
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
