@@ -56,7 +56,8 @@ Run in the **SQL Editor**, in this order:
 1. `supabase/schema.sql` — base tables, RLS, triggers
 2. `supabase/02_reconcile_and_security.sql` — verification, waitlist and staff-hours tables, storage buckets, admin access, security fixes, and the pg_cron job that releases expired holds
 3. `supabase/03_fix_signup_trigger.sql` — makes the sign-up trigger name tables in full (without it, sign-up fails with "Database error saving new user")
-4. `supabase/seed.sql` — demo data (optional; update owner UUIDs first)
+4. `supabase/04_api_grants.sql` — gives the website's roles access to the tables (newer Supabase projects don't do this automatically; without it logged-in users can't read their own profile)
+5. `supabase/seed.sql` — demo data (optional; update owner UUIDs first)
 
 To make the first admin: sign up normally, then in the SQL Editor run
 `update profiles set role = 'admin' where username = '<your-username>';`
