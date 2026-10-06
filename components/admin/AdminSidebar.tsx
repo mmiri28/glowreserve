@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  ShieldCheck,
   LayoutDashboard, Building2, Users,
   Calendar, Sparkles, LogOut, ChevronRight, Shield,
 } from "lucide-react";
@@ -12,6 +13,7 @@ import ThemeToggle from "@/components/shared/ThemeToggle";
 const NAV = [
   { icon: LayoutDashboard, label: "Overview", href: "/admin" },
   { icon: Building2, label: "Businesses", href: "/admin/businesses" },
+  { icon: ShieldCheck, label: "Verifications", href: "/admin/verifications" },
   { icon: Users, label: "Users", href: "/admin/users" },
   { icon: Calendar, label: "All Bookings", href: "/admin/bookings" },
 ];
