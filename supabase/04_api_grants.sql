@@ -33,8 +33,7 @@ GRANT SELECT (id, username, full_name, avatar_url, role, verification_status, cr
   ON public.profiles TO anon;
 
 -- Functions used inside the security rules.
-GRANT EXECUTE ON FUNCTION public.is_admin() TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.is_service_role() TO anon, authenticated, service_role;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO anon, authenticated, service_role;
 
 -- Tables added later get the same treatment automatically.
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO authenticated;

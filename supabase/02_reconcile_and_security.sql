@@ -1,6 +1,7 @@
 -- ============================================================
 -- GlowReserve — 02: reconcile schema with the code + security fixes
 -- Run AFTER schema.sql and BEFORE seed.sql, in the Supabase SQL Editor.
+-- Safe to run more than once.
 --
 -- Why this file exists: the verification, waitlist and staff-schedule
 -- features were added in code, but their database changes only ever
@@ -61,9 +62,11 @@ CREATE TABLE IF NOT EXISTS staff_availability (
 
 ALTER TABLE staff_availability ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Staff availability: public read" ON staff_availability;
 CREATE POLICY "Staff availability: public read"
   ON staff_availability FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Staff availability: owner manage" ON staff_availability;
 CREATE POLICY "Staff availability: owner manage"
   ON staff_availability FOR ALL USING (
     staff_id IN (
@@ -92,19 +95,23 @@ CREATE TABLE IF NOT EXISTS verifications (
 
 ALTER TABLE verifications ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Verifications: user reads own" ON verifications;
 CREATE POLICY "Verifications: user reads own"
   ON verifications FOR SELECT USING (auth.uid() = user_id);
 
 -- A user may submit or resubmit, but only ever as 'pending_review'.
+DROP POLICY IF EXISTS "Verifications: user submits own" ON verifications;
 CREATE POLICY "Verifications: user submits own"
   ON verifications FOR INSERT
   WITH CHECK (auth.uid() = user_id AND verification_status = 'pending_review');
 
+DROP POLICY IF EXISTS "Verifications: user resubmits own" ON verifications;
 CREATE POLICY "Verifications: user resubmits own"
   ON verifications FOR UPDATE
   USING (auth.uid() = user_id AND verification_status <> 'verified')
   WITH CHECK (auth.uid() = user_id AND verification_status = 'pending_review');
 
+DROP POLICY IF EXISTS "Verifications: admin full access" ON verifications;
 CREATE POLICY "Verifications: admin full access"
   ON verifications FOR ALL USING (public.is_admin());
 
@@ -126,9 +133,11 @@ CREATE TABLE IF NOT EXISTS waitlist (
 
 ALTER TABLE waitlist ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Waitlist: customer manages own" ON waitlist;
 CREATE POLICY "Waitlist: customer manages own"
   ON waitlist FOR ALL USING (auth.uid() = customer_id) WITH CHECK (auth.uid() = customer_id);
 
+DROP POLICY IF EXISTS "Waitlist: owner reads their business" ON waitlist;
 CREATE POLICY "Waitlist: owner reads their business"
   ON waitlist FOR SELECT USING (
     business_id IN (SELECT id FROM businesses WHERE owner_id = auth.uid())
@@ -193,6 +202,7 @@ CREATE TRIGGER profiles_protect_fields BEFORE UPDATE ON profiles
 -- Postgres rejects as infinite recursion, so profile edits always failed.
 -- The username lock now lives in the trigger above instead.
 DROP POLICY IF EXISTS "Profiles: users can update own profile (not username)" ON profiles;
+DROP POLICY IF EXISTS "Profiles: users can update own profile" ON profiles;
 CREATE POLICY "Profiles: users can update own profile"
   ON profiles FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 
@@ -200,9 +210,11 @@ CREATE POLICY "Profiles: users can update own profile"
 --     (USING true), which exposed every user's phone number.
 DROP POLICY IF EXISTS "Profiles: anyone can read public profiles" ON profiles;
 
+DROP POLICY IF EXISTS "Profiles: admin reads all" ON profiles;
 CREATE POLICY "Profiles: admin reads all"
   ON profiles FOR SELECT USING (public.is_admin());
 
+DROP POLICY IF EXISTS "Profiles: owner reads their customers" ON profiles;
 CREATE POLICY "Profiles: owner reads their customers"
   ON profiles FOR SELECT USING (
     id IN (
@@ -214,6 +226,7 @@ CREATE POLICY "Profiles: owner reads their customers"
 
 -- Reviewer names/avatars on public business pages, business owners'
 -- names in listings, and admins (so users can notify them).
+DROP POLICY IF EXISTS "Profiles: public rows for reviewers, owners and admins" ON profiles;
 CREATE POLICY "Profiles: public rows for reviewers, owners and admins"
   ON profiles FOR SELECT USING (
     role IN ('business_owner', 'admin')
@@ -227,6 +240,7 @@ REVOKE SELECT ON profiles FROM anon;
 GRANT SELECT (id, username, full_name, avatar_url, role, verification_status, created_at, updated_at)
   ON profiles TO anon;
 
+DROP POLICY IF EXISTS "Profiles: admin updates all" ON profiles;
 CREATE POLICY "Profiles: admin updates all"
   ON profiles FOR UPDATE USING (public.is_admin());
 
@@ -262,6 +276,7 @@ DROP TRIGGER IF EXISTS businesses_protect_fields ON businesses;
 CREATE TRIGGER businesses_protect_fields BEFORE INSERT OR UPDATE ON businesses
   FOR EACH ROW EXECUTE FUNCTION protect_business_fields();
 
+DROP POLICY IF EXISTS "Businesses: admin full access" ON businesses;
 CREATE POLICY "Businesses: admin full access"
   ON businesses FOR ALL USING (public.is_admin());
 
@@ -269,9 +284,11 @@ CREATE POLICY "Businesses: admin full access"
 -- ------------------------------------------------------------
 -- 6. Admin access the admin pages rely on (they were empty before).
 -- ------------------------------------------------------------
+DROP POLICY IF EXISTS "Bookings: admin reads all" ON bookings;
 CREATE POLICY "Bookings: admin reads all"
   ON bookings FOR SELECT USING (public.is_admin());
 
+DROP POLICY IF EXISTS "Reviews: admin full access" ON reviews;
 CREATE POLICY "Reviews: admin full access"
   ON reviews FOR ALL USING (public.is_admin());
 
@@ -279,10 +296,12 @@ CREATE POLICY "Reviews: admin full access"
 -- ------------------------------------------------------------
 -- 7. Notifications had no INSERT rule, so in-app notifications failed.
 -- ------------------------------------------------------------
+DROP POLICY IF EXISTS "Notifications: admin can notify anyone" ON notifications;
 CREATE POLICY "Notifications: admin can notify anyone"
   ON notifications FOR INSERT WITH CHECK (public.is_admin());
 
 -- A user may notify admins (e.g. "verification submitted"), nobody else.
+DROP POLICY IF EXISTS "Notifications: user can notify admins" ON notifications;
 CREATE POLICY "Notifications: user can notify admins"
   ON notifications FOR INSERT WITH CHECK (
     auth.uid() IS NOT NULL
@@ -299,15 +318,18 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('business-assets', 'business-assets', true)
 ON CONFLICT (id) DO NOTHING;
 
+DROP POLICY IF EXISTS "business-assets: public read" ON storage.objects;
 CREATE POLICY "business-assets: public read"
   ON storage.objects FOR SELECT USING (bucket_id = 'business-assets');
 
+DROP POLICY IF EXISTS "business-assets: owner writes own business folder" ON storage.objects;
 CREATE POLICY "business-assets: owner writes own business folder"
   ON storage.objects FOR INSERT WITH CHECK (
     bucket_id = 'business-assets'
     AND (storage.foldername(name))[1] IN (SELECT id::text FROM businesses WHERE owner_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "business-assets: owner updates own business folder" ON storage.objects;
 CREATE POLICY "business-assets: owner updates own business folder"
   ON storage.objects FOR UPDATE USING (
     bucket_id = 'business-assets'
@@ -320,16 +342,19 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('verifications', 'verifications', false)
 ON CONFLICT (id) DO NOTHING;
 
+DROP POLICY IF EXISTS "verifications: user uploads own folder" ON storage.objects;
 CREATE POLICY "verifications: user uploads own folder"
   ON storage.objects FOR INSERT WITH CHECK (
     bucket_id = 'verifications' AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
+DROP POLICY IF EXISTS "verifications: user updates own folder" ON storage.objects;
 CREATE POLICY "verifications: user updates own folder"
   ON storage.objects FOR UPDATE USING (
     bucket_id = 'verifications' AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
+DROP POLICY IF EXISTS "verifications: user and admin read" ON storage.objects;
 CREATE POLICY "verifications: user and admin read"
   ON storage.objects FOR SELECT USING (
     bucket_id = 'verifications'
