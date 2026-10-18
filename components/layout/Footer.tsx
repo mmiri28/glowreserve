@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import PoweredByMmiri from "@/components/shared/PoweredByMmiri";
 
 export default function Footer() {
   return (
@@ -349,6 +350,8 @@ export default function Footer() {
             >
               © 2026 GlowReserve. All rights reserved.
             </p>
+
+            <PoweredByMmiri />
 
             <p
               style={{

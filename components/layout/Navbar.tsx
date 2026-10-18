@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu, X, Sparkles, Bell, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import ThemeToggle from "@/components/shared/ThemeToggle";
+import { MmiriMark, MMIRI_URL } from "@/components/shared/PoweredByMmiri";
 import type { Session } from "@supabase/supabase-js";
 
 export default function Navbar() {
@@ -89,9 +90,12 @@ export default function Navbar() {
 
           {/* Back button */}
           <a
-            href="https://www.mmiri28.com"
+            href={MMIRI_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="mmiri28 (opens mmiri28.com)"
             style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "0.45rem",
               padding: "0.5rem 1rem", borderRadius: "999px",
               border: "1px solid rgba(212, 175, 55, 0.35)",
               background: "rgba(212, 175, 55, 0.08)",
@@ -114,7 +118,8 @@ export default function Navbar() {
               e.currentTarget.style.boxShadow = "none";
             }}
           >
-            MMiri28
+            <MmiriMark size={18} />
+            mmiri28
           </a>
 
           {/* Logo */}
