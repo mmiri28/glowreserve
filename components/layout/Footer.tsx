@@ -302,7 +302,7 @@ export default function Footer() {
                 }}
               >
                 {[
-                  { label: "Contact Us", href: "mailto:hello@glowreserve.com" },
+                  { label: "Contact Us", href: "mailto:support@mmiri28.com" },
                   { label: "Privacy Policy", href: "/privacy" },
                   { label: "Terms of Service", href: "/terms" },
                   { label: "Sign In", href: "/auth/login" },

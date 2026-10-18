@@ -221,6 +221,14 @@ export default function AdminVerificationsPage() {
               ))}
             </div>
 
+            {selected.verification_status !== "pending_review" &&
+              !selected.document_front_url && !selected.document_back_url &&
+              !selected.selfie_url && !selected.selfie_with_id_url && (
+                <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginBottom: "1.5rem" }}>
+                  The ID photos were deleted two months after this decision, as our privacy policy promises. The decision itself is kept.
+                </p>
+              )}
+
             {selected.verification_status === "pending_review" && (
               <>
                 {/* Rejection reason */}
