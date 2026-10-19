@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { Eye, EyeOff, Sparkles, CheckCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -13,7 +14,34 @@ function ResetContent() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  // null = still checking; false = no valid reset session (link expired, used, or opened elsewhere).
+  const [hasSession, setHasSession] = useState<boolean | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createClient();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error")) {
+      setHasSession(false);
+      return;
+    }
+    let settled = false;
+    const { data: sub } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      if (session && (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        settled = true;
+        setHasSession(true);
+      }
+    });
+    (async () => {
+      // Older links arrive with ?code=… (works only in the browser that asked).
+      const code = params.get("code");
+      if (code) await supabase.auth.exchangeCodeForSession(code).catch(() => null);
+      const { data } = await supabase.auth.getSession();
+      if (data.session) setHasSession(true);
+      else if (!settled) setTimeout(() => setHasSession((v) => (v === null ? false : v)), 1500);
+    })();
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +60,22 @@ function ResetContent() {
     }
     setLoading(false);
   };
+
+  if (hasSession === false && !done) {
+    return (
+      <div style={{ textAlign: "center", padding: "1rem 0" }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.75rem", fontWeight: "700", color: "var(--charcoal)", marginBottom: "0.75rem" }}>
+          Link not valid any more
+        </h1>
+        <p style={{ color: "var(--muted)", marginBottom: "1.5rem" }}>
+          Reset links work once and for a limited time. Please ask for a new one.
+        </p>
+        <Link href="/auth/forgot-password" className="btn-gold" style={{ display: "inline-block", padding: "0.8rem 1.5rem", borderRadius: "999px", textDecoration: "none" }}>
+          Send a new link
+        </Link>
+      </div>
+    );
+  }
 
   if (done) {
     return (
