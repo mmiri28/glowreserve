@@ -62,7 +62,7 @@ export default async function BusinessProfilePage({
 
     supabase
       .from("reviews")
-      .select("*, profiles(full_name, avatar_url)")
+      .select("*")
       .eq("business_id", business.id)
       .order("created_at", { ascending: false })
       .limit(20),
@@ -77,6 +77,26 @@ export default async function BusinessProfilePage({
       .limit(200),
   ]);
 
+  // ── Review authors: only their public name and picture (never phone) ──
+  const authorIds = Array.from(
+    new Set((reviews || []).map((r: { customer_id: string | null }) => r.customer_id).filter(Boolean)),
+  ) as string[];
+  const authors = new Map<string, { full_name: string | null; avatar_url: string | null }>();
+  if (authorIds.length) {
+    let { data: people, error: peopleError } = await supabase.rpc("public_profiles", { ids: authorIds });
+    if (peopleError) {
+      // Database not yet updated with 05_private_profiles.sql: use the old direct read.
+      ({ data: people } = await supabase.from("profiles").select("id, full_name, avatar_url").in("id", authorIds));
+    }
+    for (const p of (people || []) as { id: string; full_name: string | null; avatar_url: string | null }[]) {
+      authors.set(p.id, { full_name: p.full_name, avatar_url: p.avatar_url });
+    }
+  }
+  const reviewsWithAuthors = (reviews || []).map((r: { customer_id: string | null }) => ({
+    ...r,
+    profiles: (r.customer_id && authors.get(r.customer_id)) || null,
+  }));
+
   // ── Check if current user is logged in (for booking/waitlist) ──
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -85,7 +105,7 @@ export default async function BusinessProfilePage({
       business={business}
       services={services || []}
       staff={staff || []}
-      reviews={reviews || []}
+      reviews={reviewsWithAuthors}
       initialSlots={slots || []}
     />
   );

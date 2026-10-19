@@ -22,7 +22,7 @@ export default function PrivacyPage() {
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(2rem, 5vw, 2.75rem)", fontWeight: 700, lineHeight: 1.15, margin: "0.5rem 0 0.75rem" }}>
             Privacy policy
           </h1>
-          <p style={{ color: "var(--muted)", fontSize: "0.95rem" }}>GlowReserve · Last updated 18 October 2026</p>
+          <p style={{ color: "var(--muted)", fontSize: "0.95rem" }}>GlowReserve · Last updated 19 October 2026</p>
 
           <p style={{ marginTop: "1.5rem", fontSize: "1.08rem" }}>
             GlowReserve lets you find beauty businesses, book appointments and leave reviews, and lets businesses manage
@@ -73,8 +73,8 @@ export default function PrivacyPage() {
 
           <H3>Reviews</H3>
           <p>
-            Your star rating and comment after a booking. Reviews are public, together with your username, so other
-            customers can choose a business.
+            Your star rating and comment after a booking. Reviews are public, together with your name and profile
+            picture (never your phone number), so other customers can choose a business.
           </p>
           <Basis>
             You choose to publish a review; we show it in our legitimate interest in honest reviews (Art. 6(1)(f) GDPR;
@@ -122,12 +122,12 @@ export default function PrivacyPage() {
               so it can serve you.
             </li>
             <li>
-              <strong>Everyone</strong> can see business listings and published reviews with the reviewer&apos;s
-              username.
+              <strong>Everyone</strong> can see business listings, including the business&apos;s own phone and email,
+              and published reviews with the reviewer&apos;s name and picture.
             </li>
             <li>
-              <strong>Signed-in users</strong> can see business owners&apos; contact phone numbers, so customers can reach
-              the business.
+              <strong>Your profile</strong>, including your phone number, is visible only to you, to our admins and to
+              businesses you have booked with. Other users cannot see it.
             </li>
             <li>
               <strong>Our admins</strong> see what they need to run GlowReserve, including verification photos while a

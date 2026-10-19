@@ -255,11 +255,17 @@ export default function VerifyPage() {
         .eq("id", user.id);
 
       // Notify admins
-      const { data: admins } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("role", "admin");
-      if (admins?.length) {
+      // Profiles are private, so ask the database for the admins' IDs only.
+      let admins: { id: string }[] = [];
+      const { data: adminIds, error: adminIdsError } = await supabase.rpc("admin_ids");
+      if (!adminIdsError) {
+        admins = ((adminIds as string[] | null) || []).map((id) => ({ id }));
+      } else {
+        // Database not yet updated with 05_private_profiles.sql: use the old direct read.
+        const { data } = await supabase.from("profiles").select("id").eq("role", "admin");
+        admins = (data as { id: string }[] | null) || [];
+      }
+      if (admins.length) {
         await supabase.from("notifications").insert(
           admins.map((a: { id: string }) => ({
             user_id: a.id,
