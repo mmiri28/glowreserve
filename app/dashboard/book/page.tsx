@@ -14,6 +14,7 @@ import {
   Star,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { openTimes } from "@/lib/slots";
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -46,7 +47,44 @@ export default function BookPage() {
 
   useEffect(() => {
     fetchBusinesses();
+    loadChoiceFromLink();
   }, []);
+
+  // Coming from a salon page with a service and a time already chosen (and
+  // that time already on hold): fill everything in and go to the summary,
+  // so the customer does not have to choose it all again.
+  const loadChoiceFromLink = async () => {
+    const businessId = searchParams.get("business");
+    const serviceId = searchParams.get("service");
+    const slotId = searchParams.get("slot");
+    if (!businessId || !serviceId || !slotId) return;
+    const supabase = createClient();
+    const [{ data: biz }, { data: svc }, { data: slot }] = await Promise.all([
+      supabase.from("businesses").select("id, name").eq("id", businessId).maybeSingle(),
+      supabase.from("services").select("id, name, duration_minutes, price").eq("id", serviceId).eq("business_id", businessId).maybeSingle(),
+      supabase.from("slots").select("id, slot_datetime, staff_id, business_id").eq("id", slotId).maybeSingle(),
+    ]);
+    if (!biz || !svc || !slot || slot.business_id !== businessId) return;
+    let staffName: string | null = null;
+    if (slot.staff_id) {
+      const { data: st } = await supabase.from("staff").select("name").eq("id", slot.staff_id).maybeSingle();
+      staffName = st?.name ?? null;
+    }
+    setBooking({
+      businessId: biz.id,
+      businessName: biz.name,
+      serviceId: svc.id,
+      serviceName: svc.name,
+      serviceDuration: svc.duration_minutes,
+      servicePrice: svc.price,
+      staffId: slot.staff_id ?? null,
+      staffName,
+      slotId: slot.id,
+      slotDatetime: slot.slot_datetime,
+    });
+    setSelectedDate(new Date(slot.slot_datetime));
+    setStep(4);
+  };
 
   useEffect(() => {
     if (booking.businessId) fetchServices(booking.businessId);
@@ -55,9 +93,9 @@ export default function BookPage() {
   useEffect(() => {
     if (booking.businessId) {
       fetchStaff(booking.businessId);
-      fetchSlots(booking.businessId, selectedDate);
+      fetchSlots(booking.businessId, selectedDate, booking.staffId ?? null);
     }
-  }, [booking.businessId, selectedDate]);
+  }, [booking.businessId, selectedDate, booking.staffId]);
 
   const fetchBusinesses = async () => {
     const supabase = createClient();
@@ -91,13 +129,13 @@ export default function BookPage() {
     setStaffList(data || []);
   };
 
-  const fetchSlots = async (businessId: string, date: Date) => {
+  const fetchSlots = async (businessId: string, date: Date, staffId: string | null = booking.staffId ?? null) => {
     setLoading(true);
     const supabase = createClient();
     const dayStart = startOfDay(date).toISOString();
     const dayEnd = new Date(date.getTime() + 86400000).toISOString();
 
-    const { data } = await supabase
+    let query = supabase
       .from("slots")
       .select("*")
       .eq("business_id", businessId)
@@ -105,7 +143,10 @@ export default function BookPage() {
       .gte("slot_datetime", dayStart)
       .lt("slot_datetime", dayEnd)
       .order("slot_datetime");
-    setSlots(data || []);
+    // A chosen stylist: only their times. No preference: every time once.
+    if (staffId) query = query.eq("staff_id", staffId);
+    const { data } = await query;
+    setSlots(openTimes(data || []));
     setLoading(false);
   };
 
@@ -969,9 +1010,9 @@ export default function BookPage() {
                 ...(booking.servicePrice
                   ? [
                       {
-                        icon: <span style={{ color: "#D4AF37" }}>$</span>,
+                        icon: <span style={{ color: "#D4AF37", fontWeight: 700 }}>₦</span>,
                         label: "Price",
-                        value: `₦${booking.servicePrice}`,
+                        value: `₦${Number(booking.servicePrice).toLocaleString()}`,
                       },
                     ]
                   : []),

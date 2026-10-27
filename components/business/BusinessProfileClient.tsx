@@ -13,8 +13,10 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import WaitlistButton from "@/components/shared/WaitlisButton";
+import { openTimes } from "@/lib/slots";
 
 type Tab = "services" | "availability" | "reviews";
+
 
 export default function BusinessProfileClient({
   business,
@@ -48,7 +50,7 @@ export default function BusinessProfileClient({
     const todaySlots = initialSlots.filter(s =>
       isSameDay(new Date(s.slot_datetime), today)
     );
-    setSlots(todaySlots);
+    setSlots(openTimes(todaySlots));
     checkAuth();
   }, []);
 
@@ -69,7 +71,7 @@ export default function BusinessProfileClient({
       .eq("business_id", business.id).eq("status", "free")
       .gte("slot_datetime", dayStart).lt("slot_datetime", dayEnd)
       .order("slot_datetime");
-    setSlots(data || []);
+    setSlots(openTimes(data || []));
     setLoadingSlots(false);
   }, [business.id]);
 
@@ -85,7 +87,7 @@ export default function BusinessProfileClient({
         .eq("business_id", business.id).eq("status", "free")
         .gte("slot_datetime", dayStart).lt("slot_datetime", dayEnd)
         .order("slot_datetime");
-      setDaySlots(data || []);
+      setDaySlots(openTimes(data || []));
     } else {
       const weekStart = startOfDay(availDate);
       const weekEnd = new Date(weekStart.getTime() + 7 * 86400000);
@@ -99,7 +101,7 @@ export default function BusinessProfileClient({
         const day = addDays(weekStart, i);
         return {
           date: day,
-          slots: (data || []).filter((s: any) => isSameDay(new Date(s.slot_datetime), day)),
+          slots: openTimes((data || []).filter((s: any) => isSameDay(new Date(s.slot_datetime), day))),
 
         };
       });
@@ -203,8 +205,8 @@ export default function BusinessProfileClient({
       <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 1.25rem" }}>
         {/* Header */}
         <div style={{
-          display: "flex", gap: "1.25rem", alignItems: "flex-end",
-          marginTop: "-52px", marginBottom: "1.75rem", flexWrap: "wrap",
+          display: "flex", gap: "1.25rem", alignItems: "flex-start",
+          marginBottom: "1.75rem", flexWrap: "wrap",
         }}>
           <div style={{
             width: "88px", height: "88px", borderRadius: "1.125rem",
@@ -212,13 +214,14 @@ export default function BusinessProfileClient({
             boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: "2.25rem", flexShrink: 0, overflow: "hidden",
+            marginTop: "-44px", position: "relative",
           }}>
             {business.logo_url
               ? <img src={business.logo_url} alt=""
                   style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               : "✨"}
           </div>
-          <div style={{ flex: 1, paddingBottom: "0.25rem" }}>
+          <div style={{ flex: 1, minWidth: 0, paddingTop: "0.875rem" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flexWrap: "wrap" }}>
               <h1 style={{
                 fontFamily: "'Playfair Display', serif",
@@ -259,7 +262,7 @@ export default function BusinessProfileClient({
               )}
               {minPrice !== Infinity && (
                 <span style={{ fontSize: "0.9rem", color: "var(--muted)" }}>
-                  From <strong style={{ color: "var(--charcoal)" }}>₦{minPrice}</strong>
+                  From <strong style={{ color: "var(--charcoal)" }}>₦{Number(minPrice).toLocaleString()}</strong>
                 </span>
               )}
             </div>
@@ -278,9 +281,8 @@ export default function BusinessProfileClient({
         {/* Main grid */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "1fr",
           gap: "1.5rem",
-        }} className="lg:grid-cols-[1fr_340px]">
+        }} className="grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_340px]">
 
           {/* LEFT */}
           <div>
@@ -635,7 +637,7 @@ export default function BusinessProfileClient({
                     </p>
                     {selectedService.price != null && (
                       <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.125rem", fontWeight: "700", color: "var(--charcoal)" }}>
-                        ${Number(selectedService.price).toLocaleString()}
+                        ₦{Number(selectedService.price).toLocaleString()}
                       </span>
                     )}
                   </div>
@@ -695,6 +697,9 @@ export default function BusinessProfileClient({
                   </>
                 ) : (
                   <div style={{ marginBottom: "1rem" }}>
+                    <p style={{ fontSize: "0.875rem", color: "var(--muted)", marginBottom: "0.5rem" }}>
+                      No open times on this day. Choose another day.
+                    </p>
                     <WaitlistButton
                       businessId={business.id}
                       serviceId={selectedService?.id}
@@ -719,7 +724,7 @@ export default function BusinessProfileClient({
                       </p>
                     </div>
                     <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.25rem", fontWeight: "700", color: "#D4AF37" }}>
-                      ${Number(selectedService.price).toLocaleString()}
+                      ₦{Number(selectedService.price).toLocaleString()}
                     </p>
                   </div>
                 )}
