@@ -139,9 +139,11 @@ export default function CalendarPage() {
 
       {/* Week view */}
       {view === "week" && (
-        <div style={{ background: "var(--surface)", borderRadius: "1.25rem", border: "1px solid var(--border)", overflow: "hidden" }}>
+        <div style={{ background: "var(--surface)", borderRadius: "1.25rem", border: "1px solid var(--border)", overflowX: "auto" }}>
+          {/* Seven columns need some room: on a phone the week scrolls sideways. */}
+          <div style={{ minWidth: "640px" }}>
           {/* Day headers */}
-          <div style={{ display: "grid", gridTemplateColumns: "60px repeat(7, 1fr)", borderBottom: "1px solid var(--border)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "60px repeat(7, minmax(0, 1fr))", borderBottom: "1px solid var(--border)" }}>
             <div style={{ padding: "0.75rem 0.5rem" }} />
             {weekDays.map((day, i) => {
               const isToday = isSameDay(day, new Date());
@@ -168,7 +170,7 @@ export default function CalendarPage() {
           {/* Time slots */}
           <div style={{ overflowY: "auto", maxHeight: "600px" }}>
             {HOURS.map((hour) => (
-              <div key={hour} style={{ display: "grid", gridTemplateColumns: "60px repeat(7, 1fr)", minHeight: "60px", borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
+              <div key={hour} style={{ display: "grid", gridTemplateColumns: "60px repeat(7, minmax(0, 1fr))", minHeight: "60px", borderBottom: "1px solid rgba(0,0,0,0.04)" }}>
                 <div style={{ padding: "0.375rem 0.5rem", textAlign: "right" }}>
                   <span style={{ fontSize: "0.6875rem", color: "var(--muted)", fontWeight: "500" }}>
                     {hour > 12 ? `${hour - 12}pm` : hour === 12 ? "12pm" : `${hour}am`}
@@ -185,6 +187,7 @@ export default function CalendarPage() {
                       borderLeft: "1px solid var(--border)",
                       padding: "0.25rem",
                       position: "relative",
+                      minWidth: 0,
                     }}>
                       {dayBookings.map((booking) => (
                         <div key={booking.id} style={{
@@ -207,6 +210,7 @@ export default function CalendarPage() {
                 })}
               </div>
             ))}
+          </div>
           </div>
         </div>
       )}

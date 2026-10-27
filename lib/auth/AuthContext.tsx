@@ -102,19 +102,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initAuth();
 
+    // No await inside this callback (see components/layout/Navbar.tsx): the
+    // profile and business are loaded just after it returns.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event: AuthChangeEvent, session: Session | null) => {
+      (_event: AuthChangeEvent, session: Session | null) => {
         setUser(session?.user ?? null);
         if (session?.user) {
-          const profileData = await fetchProfile(session.user.id);
-          if ((profileData as any)?.role === "business_owner") {
-            await fetchBusiness(session.user.id);
-          }
+          const userId = session.user.id;
+          setTimeout(async () => {
+            const profileData = await fetchProfile(userId);
+            if ((profileData as any)?.role === "business_owner") {
+              await fetchBusiness(userId);
+            }
+            setLoading(false);
+          }, 0);
         } else {
           setProfile(null);
           setBusiness(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 

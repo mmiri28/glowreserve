@@ -6,7 +6,7 @@ import {
 import AnalyticsChart from "@/components/business/AnalyticsChart";
 import {
   Calendar, Users, TrendingUp, Star,
-  DollarSign, ArrowUpRight, ArrowDownRight,
+  ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -133,7 +133,7 @@ export default async function AnalyticsPage() {
       bg: "rgba(212,175,55,0.08)",
     },
     {
-      icon: <DollarSign size={22} color="#4CAF7C" />,
+      icon: <span style={{ fontSize: "1.375rem", fontWeight: 700, color: "#4CAF7C", lineHeight: 1 }}>₦</span>,
       label: "Revenue This Month",
       value: `₦${monthlyRevenue.toLocaleString()}`,
       sub: `₦${totalRevenue.toLocaleString()} total all time`,

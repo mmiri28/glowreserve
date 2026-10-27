@@ -38,16 +38,23 @@ export default function Navbar() {
 
     loadUser();
 
+    // No await inside this callback: supabase-js holds its auth lock while it
+    // runs, so a query made here would wait for that lock forever and every
+    // later Supabase call on the page would hang. The role is fetched just
+    // after the callback returns instead.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event: any, session: Session | null) => {
+      (_event: any, session: Session | null) => {
         setUser(session?.user ?? null);
         if (session?.user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", session.user.id)
-            .maybeSingle();
-          setUserRole(profile?.role || "customer");
+          const userId = session.user.id;
+          setTimeout(async () => {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("role")
+              .eq("id", userId)
+              .maybeSingle();
+            setUserRole(profile?.role || "customer");
+          }, 0);
         } else {
           setUserRole(null);
         }
